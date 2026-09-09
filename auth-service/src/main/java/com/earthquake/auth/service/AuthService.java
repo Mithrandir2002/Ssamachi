@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface AuthService {
 
-    String register(RegisterRequest request);
+    RegisterResponse register(RegisterRequest request);
 
     AuthResponse verifyRegistration(VerifyRegistrationRequest request);
 

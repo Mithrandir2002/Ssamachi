@@ -10,6 +10,8 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 /**
  * auth-service is both publisher and consumer here — this queue is only ever
  * produced to and consumed by this same service, so no separate notification
@@ -19,10 +21,19 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String AUTH_EXCHANGE = "auth.exchange";
+    public static final String AUTH_RETRY_EXCHANGE = "auth.retry.exchange";
+
     public static final String EMAIL_VERIFICATION_QUEUE = "email-verification.queue";
     public static final String EMAIL_VERIFICATION_ROUTING_KEY = "email.verification";
-    public static final String EMAIL_VERIFICATION_DLQ = "email-verification.queue.dlq";
-    private static final String AUTH_DEAD_LETTER_EXCHANGE = "auth.exchange.dlx";
+
+    public static final String EMAIL_VERIFICATION_RETRY_QUEUE = "email-verification.retry.queue";
+    public static final String EMAIL_VERIFICATION_RETRY_ROUTING_KEY = "email.verification.retry";
+
+    public static final String EMAIL_VERIFICATION_DLQ = "email-verification.dlq";
+
+    public static final long RETRY_DELAY_MS = Duration.ofSeconds(30).toMillis();
+
+    public static final int MAX_ATTEMPTS = 3;
 
     @Bean
     public DirectExchange authExchange() {
@@ -30,20 +41,30 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public DirectExchange authDeadLetterExchange() {
-        return new DirectExchange(AUTH_DEAD_LETTER_EXCHANGE);
+    public DirectExchange authRetryExchange() {
+        return new DirectExchange(AUTH_RETRY_EXCHANGE);
     }
 
     @Bean
     public Queue emailVerificationQueue() {
         return QueueBuilder.durable(EMAIL_VERIFICATION_QUEUE)
-                .withArgument("x-dead-letter-exchange", AUTH_DEAD_LETTER_EXCHANGE)
+                // basicNack(requeue=false) sends the message here -> the retry queue
+                .withArgument("x-dead-letter-exchange", AUTH_RETRY_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", EMAIL_VERIFICATION_RETRY_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Queue emailVerificationRetryQueue() {
+        return QueueBuilder.durable(EMAIL_VERIFICATION_RETRY_QUEUE)
+                .withArgument("x-message-ttl", RETRY_DELAY_MS)
+                .withArgument("x-dead-letter-exchange", AUTH_EXCHANGE)
                 .withArgument("x-dead-letter-routing-key", EMAIL_VERIFICATION_ROUTING_KEY)
                 .build();
     }
 
     @Bean
-    public Queue emailVerificationDeadLetterQueue() {
+    public Queue emailVerificationDlq() {
         return QueueBuilder.durable(EMAIL_VERIFICATION_DLQ).build();
     }
 
@@ -55,10 +76,10 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding emailVerificationDeadLetterBinding() {
-        return BindingBuilder.bind(emailVerificationDeadLetterQueue())
-                .to(authDeadLetterExchange())
-                .with(EMAIL_VERIFICATION_ROUTING_KEY);
+    public Binding emailVerificationRetryBinding() {
+        return BindingBuilder.bind(emailVerificationRetryQueue())
+                .to(authRetryExchange())
+                .with(EMAIL_VERIFICATION_RETRY_ROUTING_KEY);
     }
 
     @Bean

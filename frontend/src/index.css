@@ -1,6 +1,41 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+@import "tailwindcss";
+
+/* Antique treasure map meets modern cartography. */
+@theme {
+  --color-parchment: #f6efe3;
+  --color-parchment-deep: #ece0cd;
+  --color-umber: #4a3728;
+  --color-umber-soft: #6f5942;
+  --color-terracotta: #b4654a;
+  --color-terracotta-soft: #d9a189;
+  --color-rust: #c2571e;
+  --color-rust-deep: #a4460f;
+  --color-sepia-line: #b99b74;
+
+  --shadow-warm: 0 18px 40px -12px rgba(90, 62, 40, 0.28);
+  --shadow-warm-sm: 0 8px 20px -10px rgba(90, 62, 40, 0.35);
+
+  --animate-seismic: seismic 1.6s linear infinite;
+  --animate-compass: compass 14s linear infinite;
+
+  /* The waveform repeats every 120 units, so translating one period loops seamlessly. */
+  @keyframes seismic {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-120px);
+    }
+  }
+
+  @keyframes compass {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 * {
@@ -10,6 +45,11 @@
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: var(--color-parchment);
+  color: var(--color-umber);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Avenir, Helvetica, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 nav ul {
@@ -18,5 +58,5 @@ nav ul {
   list-style: none;
   padding: 0.75rem 1rem;
   margin: 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-parchment-deep);
 }

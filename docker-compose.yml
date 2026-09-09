@@ -16,7 +16,7 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
       MSSQL_PID: Developer
     ports:
-      - "14330:1433"
+      - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
     networks:
@@ -59,7 +59,7 @@ services:
     image: redis:7-alpine
     container_name: redis
     ports:
-      - "16379:6379"
+      - "6379:6379"
     networks:
       - earthquake-net
 

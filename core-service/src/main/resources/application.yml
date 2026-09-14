@@ -28,6 +28,18 @@ spring:
 
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all           # chờ mọi replica xác nhận, đổi độ trễ lấy độ bền
+      properties:
+        linger.ms: 20     # gom message nhỏ thành lô trước khi gửi
+    consumer:
+      group-id: core-service
+      # Mặc định của Kafka là "latest": consumer group mới sẽ bỏ qua toàn bộ message
+      # đã nằm sẵn trong topic. Backfill xong mà bảng vẫn trống là do đúng dòng này.
+      auto-offset-reset: earliest
+      # Deserializer cấu hình ở T5 khi viết consumer.
 
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}

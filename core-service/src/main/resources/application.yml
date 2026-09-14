@@ -46,3 +46,23 @@ management:
 
 jwt:
   secret: ${JWT_SECRET:dev-only-local-secret-change-me}
+
+usgs:
+  # Backfill lịch sử (truy vấn động)
+  fdsn-base-url: "https://earthquake.usgs.gov/fdsnws/event/1/query"
+
+  # Near-realtime (feed tĩnh)
+  realtime-feed-url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"
+  realtime-enabled: ${USGS_REALTIME_ENABLED:true}   # công tắc tắt poll khi dev/test
+  poll-interval-ms: 300000                          # 5 phút (T4)
+
+  # RestTemplate
+  connect-timeout-ms: 5000
+  read-timeout-ms: 30000                            # query lịch sử nặng hơn feed nhiều
+  user-agent: "Ssamachi-EarthquakePlatform/0.1 (learning project)"
+
+  # Tham số nghiệp vụ
+  default-min-magnitude: 2.5
+  backfill-start-date: "2020-01-01"
+  backfill-chunk-days: 30                           # cắt batch theo ~1 tháng (T8)
+  max-events-per-query: 20000                       # giới hạn cứng của FDSN, dùng để phát hiện batch bị cắt cụt (T8)

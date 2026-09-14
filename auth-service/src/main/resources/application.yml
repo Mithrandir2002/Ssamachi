@@ -27,11 +27,9 @@ spring:
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: ${SPRING_RABBITMQ_PORT:5672}
-    listener:
-      simple:
-        # The listener acks/nacks explicitly; retry + DLQ routing is handled in
-        # EmailVerificationConsumer, so Spring's own retry interceptor stays off.
-        acknowledge-mode: manual
+    # Listener settings (ack mode, concurrency, prefetch) live in RabbitListenerConfig,
+    # not here: that class defines the container factory by hand, which makes Spring
+    # Boot's auto-configuration back off and ignore spring.rabbitmq.listener.* entirely.
 
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}

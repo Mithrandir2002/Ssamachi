@@ -62,6 +62,10 @@ public class Earthquake {
     @Column(name = "felt_reports")
     private Integer feltReports;
 
+    /** USGS properties.type: earthquake, quarry blast, explosion, ice quake... */
+    @Column(name = "event_type", length = 30)
+    private String eventType;
+
     @Column(name = "ingested_at", nullable = false)
     private LocalDateTime ingestedAt;
 }

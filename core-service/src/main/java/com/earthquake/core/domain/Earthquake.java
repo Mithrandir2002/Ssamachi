@@ -66,6 +66,18 @@ public class Earthquake {
     @Column(name = "event_type", length = 30)
     private String eventType;
 
+    /** USGS significance score — magnitude, felt reports and estimated impact combined. */
+    private Integer sig;
+
+    /** When this row was first written locally. */
     @Column(name = "ingested_at", nullable = false)
     private LocalDateTime ingestedAt;
+
+    /**
+     * When this row was last written locally. Not to be confused with {@link #updatedTime},
+     * which is USGS's own revision timestamp and is what decides whether an incoming
+     * message is newer than the stored one.
+     */
+    @Column(name = "row_updated_at")
+    private LocalDateTime rowUpdatedAt;
 }

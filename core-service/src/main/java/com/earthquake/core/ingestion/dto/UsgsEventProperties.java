@@ -21,4 +21,5 @@ public class UsgsEventProperties {
     private Integer tsunami;
     private Integer felt;
     private String type;
+    private Integer sig;
 }

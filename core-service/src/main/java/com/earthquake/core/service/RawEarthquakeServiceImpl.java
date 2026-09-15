@@ -4,6 +4,7 @@ package com.earthquake.core.service;
 import com.earthquake.core.domain.Earthquake;
 import com.earthquake.core.repository.EarthquakeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RawEarthquakeServiceImpl implements RawEarthquakeService {
@@ -15,10 +16,16 @@ public class RawEarthquakeServiceImpl implements RawEarthquakeService {
     }
 
     @Override
+    @Transactional
     public Earthquake saveEarthquake(Earthquake earthquake) {
-        return earthquakeRepository.findById(earthquake.getId())
+        Earthquake saved =  earthquakeRepository.findById(earthquake.getId())
                 .map(existing -> saveIfNewer(existing, earthquake))
                 .orElseGet(() -> earthquakeRepository.save(earthquake));
+        earthquakeRepository.updateLocation(
+                saved.getId(),
+                saved.getLatitude(),
+                saved.getLongitude());
+        return saved;
     }
 
     private Earthquake saveIfNewer(Earthquake existing, Earthquake incoming) {

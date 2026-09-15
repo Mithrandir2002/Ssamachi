@@ -37,10 +37,16 @@ spring:
         linger.ms: 20     # gom message nhỏ thành lô trước khi gửi
     consumer:
       group-id: core-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       # Mặc định của Kafka là "latest": consumer group mới sẽ bỏ qua toàn bộ message
       # đã nằm sẵn trong topic. Backfill xong mà bảng vẫn trống là do đúng dòng này.
       auto-offset-reset: earliest
-      # Deserializer cấu hình ở T5 khi viết consumer.
+      properties:
+        # Đọc UsgsFeature khi message không có type header (ví dụ gửi từ Kafka UI).
+        # JsonSerializer của KafkaProducerService vẫn có thể dùng type header của nó.
+        spring.json.value.default.type: com.earthquake.core.ingestion.dto.UsgsFeature
+        spring.json.trusted.packages: com.earthquake.core.ingestion.dto
 
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}

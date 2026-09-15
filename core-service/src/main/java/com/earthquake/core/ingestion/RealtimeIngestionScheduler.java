@@ -8,7 +8,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Polls the USGS "past hour" feed and publishes every event it contains.
@@ -32,6 +34,8 @@ public class RealtimeIngestionScheduler {
 
     @Scheduled(fixedDelayString = "${usgs.poll-interval-ms}")
     public void pollRealtimeFeed() {
-
+        Optional.ofNullable(usgsClient.fetchRealtimeFeed())
+                .orElseGet(Collections::emptyList)
+                .forEach(kafkaProducerService::sendRawEarthquake);
     }
 }

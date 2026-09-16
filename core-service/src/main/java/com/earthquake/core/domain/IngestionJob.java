@@ -2,9 +2,13 @@ package com.earthquake.core.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,8 +40,9 @@ public class IngestionJob {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status;
+    private JobStatus status;
 
     @Column(name = "records_processed", nullable = false)
     private int recordsProcessed;
@@ -50,4 +55,24 @@ public class IngestionJob {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * The DEFAULT SYSUTCDATETIME() on created_at never fires: Hibernate lists every
+     * mapped column in the INSERT, so a null field is written as an explicit NULL and
+     * violates NOT NULL. The value has to be set here.
+     */
+    @PrePersist
+    void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+        if (this.status == null) {
+            this.status = JobStatus.PENDING;
+        }
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

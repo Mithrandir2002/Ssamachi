@@ -24,7 +24,7 @@ public class RawIngestionPayload {
 
     private String source;
 
-    private String fetchType;
+    private FetchType fetchType;
 
     private Map<String, Object> requestParams;
 
@@ -32,5 +32,10 @@ public class RawIngestionPayload {
 
     private Instant fetchedAt;
 
-    private String jobId;
+    /**
+     * References {@code ingestion_jobs.id} in SQL Server — the backfill run this payload
+     * belongs to. Null for {@link FetchType#REALTIME}: a scheduled poll is not a job, and
+     * creating a row for each of the ~288 daily polls would be noise.
+     */
+    private Long jobId;
 }
